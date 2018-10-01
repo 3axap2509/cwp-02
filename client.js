@@ -1,28 +1,19 @@
 const fs = require('fs');
 const net = require('net');
-const port = 8124;
+const port = 8125;
 const client = new net.Socket();
 var qa = [];
 var waiting4answer = false;
 var connected = false;
 var counter4questing = 0;
+var json_b = false;
 
 
 client.setEncoding('utf8');
 
 client.connect(port, function() {
-  fs.readFile('qa.json', 'utf8', (err,data) =>
-  {
-    if(err)
-    {
-      console.error(err);
-    }
-    else
-    {
-      qa = JSON.parse(data);
-      json_b = true;
-    }
-  });
+  let vp = fs.readFileSync('qa.json');
+  qa = JSON.parse(vp);
   console.log('Connected to server');
   client.write('qa');
 });
@@ -35,14 +26,13 @@ client.on('data', function(data)
     connected = true;
     write_question(client);
   }
-  else if(data == 'DEC')
+  else if(data == 'DEC'|| data =='bye')
   {
     client.destroy();
   }
   else
   {
     let bbb = false;
-    let buf;
     qa.forEach(element =>
     {
       if(data == element.a)
@@ -70,7 +60,6 @@ function write_question(client)
   else
   {
     client.write('bye');
-    client.destroy();
   }
 }
 
@@ -79,3 +68,15 @@ function getRand(min, max)
   var rand = min + Math.random()*(max-min+1);
   return Math.floor(rand);
 }
+
+// function jj()
+// {
+//   for(let i = 0; i < 100; i ++)
+//   {
+//     let r1 = getRand(0, qa.length);
+//     let r2 = getRand(0, qa.length);
+//     let buf = qa[r1];
+//     qa[r1] = qa[r2];
+//     qa[r2] = buf;
+//   }
+// }
